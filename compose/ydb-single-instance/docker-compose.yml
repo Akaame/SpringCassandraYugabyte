@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  yugabyte:
+    image: yugabytedb/yugabyte
+    command: bin/yugabyted start --daemon=false
+    ports:
+      - "5433:5433"
+      - "7000:7000"
+      - "9000:9000"
+      - "9042:9042"

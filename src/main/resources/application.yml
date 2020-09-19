@@ -1,0 +1,13 @@
+# spring
+#  datasource:
+#    platform: postgres
+#    url: jdbc:postgresql://localhost:5433/postgres
+#    username: postgres
+#    password:
+
+cassandra:
+  schema-action: CREATE_IF_NOT_EXISTS
+  keyspace-name: sample
+  contact-points: localhost
+  port: 9042
+  local-datacenter: datacenter1

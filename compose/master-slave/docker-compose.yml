@@ -1,0 +1,54 @@
+version: '3'
+
+volumes:
+  yb-master-data:
+  yb-exposed-tserver-data:
+  yb-tserver-data:
+
+services:
+  yb-master:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master
+    volumes:
+      - yb-master-data:/mnt/master
+    command: [ "/home/yugabyte/bin/yb-master",
+               "--fs_data_dirs=/mnt/master",
+               "--master_addresses=yb-master:7100",
+               "--rpc_bind_addresses=yb-master:7100",
+               "--replication_factor=1"]
+    ports:
+      - "7000:7000"
+    environment:
+      SERVICE_7000_NAME: yb-master
+  yb-exposed-tserver:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-exposed-tserver
+    volumes:
+      - yb-exposed-tserver-data:/mnt/tserver
+    command: [ "/home/yugabyte/bin/yb-tserver",
+               "--fs_data_dirs=/mnt/tserver",
+               "--start_pgsql_proxy",
+               "--rpc_bind_addresses=yb-exposed-tserver:9100",
+               "--tserver_master_addrs=yb-master:7100"]
+    ports:
+      - "9042:9042"
+      - "5433:5433"
+      - "9000:9000"
+    environment:
+      SERVICE_5433_NAME: ysql
+      SERVICE_9042_NAME: ycql
+      SERVICE_9000_NAME: yb-tserver
+    depends_on:
+      - yb-master
+
+  yb-tserver:
+    image: yugabytedb/yugabyte:latest
+    volumes:
+      - yb-tserver-data:/mnt/tserver
+    command: [ "/home/yugabyte/bin/yb-tserver",
+               "--fs_data_dirs=/mnt/tserver",
+               "--start_pgsql_proxy",
+               "--rpc_bind_addresses=0.0.0.0:9100",
+               "--tserver_master_addrs=yb-master:7100"]
+    depends_on:
+      - yb-master
